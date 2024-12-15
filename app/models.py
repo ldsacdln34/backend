@@ -4,8 +4,8 @@ from django.db import models
 class Url(models.Model):
 
     url = models.CharField(max_length=255)
-    date = models.DateField()
-    time = models.DateTimeField()
+    date = models.DateField(auto_now=True)
+    time = models.DateTimeField(auto_now=True)
     cout = models.IntegerField()
 
 class BlackList(models.Model):
