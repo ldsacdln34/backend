@@ -9,7 +9,7 @@ django.setup()
 
 def llenadoLista(lista):
     object_url = Url.objects.create(
-        url = "www.test.leo",
+        url = "www.test.leoeeeee",
         cout = 0
     )
     print (f"Finish {object_url}")
