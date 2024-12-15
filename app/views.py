@@ -1,11 +1,10 @@
 from django.shortcuts import render
-
-
-from rest_framework import viewsets
 from .serializer import UrlSerializer, UrlSerializer2
 from .models import Url, BlackList,WhiteList, Graylist
 import requests 
+import json
 
+from rest_framework import viewsets
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
@@ -18,17 +17,39 @@ class UrlViewSet(viewsets.ModelViewSet):
 #    queryset = BlackList.objects.all()
 #    serializer_class = UrlSerializer2
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def check_list(request):
-    is_white_list = "aceptado"
-    url = "https://www.facebuook.com"
-    result = checkList(url)
-    print(result)
+    #url = "https://www.facebuook.com"
 
+    url = request.data.get("url")
+    result = checkList(url)
 
     return Response({
         'status_scan': result, 
-        'url': "www.leo.com",
+        'url': url,
+    })
+
+@api_view(['POST'])
+def sandbox(request):
+    #request_data = request.get_json()
+    #url = request_data['url']
+    #page_data = requests.get(url)
+    #status_code = page_data.status_code
+    #content = page_data.text
+    #status_scan = True 
+    #dato = data.json()
+    #time.sleep(5)
+    #return Response({  
+    #    'status_scan': status_scan,
+    #    'url': url,
+    #    'status_code': status_code,
+    #    'web_page': content
+    #})
+    return Response({  
+        'status_scan': "whiteList",
+        'url': "wwww.test.leo",
+        'status_code': 404,
+        'web_page': "Contenido"
     })
 
 
@@ -41,41 +62,48 @@ def checkList(url):
              mydata =Graylist.objects.filter(url__url=url).first()
              if not mydata:
                  result= apiTerceros(url)
-                 print (result)
                  return result
              else:
-                 return "Gray List"
+                 return "grayList"
          else:
-          return "White List"
+          return "whiteList"
     else:
-        return "Black List"
+        return "blackList"
     
-    return ""
+    return "indeterminado"
 
 def apiTerceros(url):
-    Key = "6c17899cc957d571c00ab9b01e4179fde72c9bf5980b94d26cc158c1f8be1a73"
-    payload = { "url":url }
+    url_tercero = "https://www.virustotal.com/api/v3/urls"
+    Key = "7fa6a9b0a5e3f48e078845224e9d3ddcb52fd5e02d8b57a24af500cf63d1010b"
 
+    
+    payload = { "url":url }
     headers = {
         "accept": "application/json",
         "x-apikey": Key,
         "content-type": "application/x-www-form-urlencoded"
 
      }
-    report_response = requests.post(url, data=payload, headers=headers)
-    report_id = report_response.json()["data"]["id"]
-    api_url = f"https://www.virustotal.com/api/v3/analyses/{report_id}"
-    headers = {
-        "accept": "application/json",
-        "x-apikey": "6c17899cc957d571c00ab9b01e4179fde72c9bf5980b94d26cc158c1f8be1a73"
-     }
-    response_consult = requests.get(api_url, headers=headers)
-    stats = response_consult.json()["data"]["attributes"]["stats"]["malicius"]
-    if stats > 0:
-        return "Black List"
-    else:
-        return "Indeterminado Virus total"
-    return ""
+    try:
+        report_response = requests.post(url_tercero, data=payload, headers=headers)
+        report_id = report_response.json()["data"]["id"]
+        api_url = f"https://www.virustotal.com/api/v3/analyses/{report_id}"
+        headers = {
+            "accept": "application/json",
+            "x-apikey": Key
+         }
+        response_consult = requests.get(api_url, headers=headers)
+        try: 
+            stats = response_consult.json()["data"]["attributes"]["stats"]["malicious"]
+            if stats > 0:
+                return "blackList"
+            else:
+                return "indeterminado"
+        except:
+            print("sucedio un error con la segunda consulta")
+    except:
+        print("Sucedio un error con la primera consulta")
+    return "indeterminado"
 
 
 

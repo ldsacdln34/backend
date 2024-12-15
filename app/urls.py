@@ -8,5 +8,6 @@ router.register(r'urls', views.UrlViewSet)
 
 urlpatterns = [
     path("", include(router.urls)),
-    path("check-url", views.check_list)
+    path("check-url", views.check_list),
+    path("sandbox", views.sandbox)
 ]
