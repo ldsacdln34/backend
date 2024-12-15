@@ -3,6 +3,7 @@ from .serializer import UrlSerializer, UrlSerializer2
 from .models import Url, BlackList,WhiteList, Graylist
 import requests 
 import json
+import time
 
 from rest_framework import viewsets
 from rest_framework.decorators import api_view
@@ -31,25 +32,25 @@ def check_list(request):
 
 @api_view(['POST'])
 def sandbox(request):
-    #request_data = request.get_json()
-    #url = request_data['url']
-    #page_data = requests.get(url)
-    #status_code = page_data.status_code
-    #content = page_data.text
-    #status_scan = True 
-    #dato = data.json()
-    #time.sleep(5)
-    #return Response({  
-    #    'status_scan': status_scan,
-    #    'url': url,
-    #    'status_code': status_code,
-    #    'web_page': content
-    #})
+    try:
+        url = request.data.get("url")
+        page_data = requests.get(url)
+        status_code = page_data.status_code
+        content = page_data.text
+        status_scan = "whiteList" 
+        time.sleep(5)
+    except:
+        status_code = "indeterminado"
+        content = ""
+        status_scan = 404 
+
+
+
     return Response({  
-        'status_scan': "whiteList",
-        'url': "wwww.test.leo",
-        'status_code': 404,
-        'web_page': "Contenido"
+        'status_scan': status_scan,
+        'url': url,
+        'status_code': status_code,
+        'web_page': content
     })
 
 
